@@ -144,10 +144,15 @@ window.addEventListener('mousemove',(event)=>{
  * Animate
  */
 const clock = new THREE.Clock()
+let previousTime = 0
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    let deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
+
+    //console.log(deltaTime)
 
     //Animate meshes
     for (const mesh of sectionMeshes){
@@ -159,11 +164,13 @@ const tick = () =>
     camera.position.y = - scrollY / sizes.height * objectsDistance
     //console.log(camera.position.y)
     //Animate camera to add parallax based on cursor X,Y values
-    const parallaxX = cursor.x
-    const parallaxY = - cursor.y
-
-    cameraGroup.position.x = parallaxX
-    cameraGroup.position.y = parallaxY
+    const parallaxX = cursor.x * 0.5
+    const parallaxY = - cursor.y * 0.5
+    // LERP adds smoothing to the parallax
+    // LERP needs to be using deltaTime so it runs the same speed
+    // regrdless of the diplay refresh frequency
+    cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * deltaTime * 5
+    cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * deltaTime * 5
 
     // Render
     renderer.render(scene, camera)
